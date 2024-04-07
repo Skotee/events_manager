@@ -3,70 +3,81 @@ import axios from 'axios';
 
 import Event from '../../types/event';
 
-const EVENTS_URL = 'http://localhost:5000/events'
+const EVENTS_URL = 'http://localhost:5000'
 
-export const fetchEvents = createAsyncThunk('events/fetchEvents', async () => {
-  try { //TODO: do podmiany na fulfilled
-    const response = await axios.get(EVENTS_URL)
-    return [...response.data]
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-      return err.message;
-    } else {
-      return 'An error occurred';
+export type initialStateType = {
+  events: Event[],
+  singleEvent: Event | null; 
+  status: string,
+  error: string | null,
+}
+
+const initialState: initialStateType = {
+  events: [],
+  singleEvent: null,
+  status: 'idle',
+  error: null
+}
+
+export const fetchEvents = createAsyncThunk(
+  'events/fetchEvents', 
+  async () => {
+    const response = await axios.get(`${EVENTS_URL}/events`);
+    return response.data
+  })
+
+export const fetchEventById = createAsyncThunk(
+  'events/fetchEventById',
+  async (eventId: number) => {
+    try {
+      const response = await axios.get(`${EVENTS_URL}/event/${eventId}`);     
+      return response.data;
+    } catch (error) {
+      throw Error('Failed to fetch event by ID');
     }
-}})
+  }
+);
 
-const initialState: Event[] = [
-    {
-      id: 1,
-      title: 'Pop music concert',
-      date: '2024-03-21T10:00:00',
-      description: 'Metallica Concert',
-      image: 'https://images.pexels.com/photos/2263436/pexels-photo-2263436.jpeg?auto=compress&cs=tinysrgb&w=600',
-      eventType: 'Culture',
-      phoneNumber: '123456789',
-      email: 'email@metallica.com',
-      location: 'Hala Stulecia, Wrocław'
-    },
-    {
-      id: 2,
-      title: 'Festive of colors',
-      date: '2024-03-22T11:00:00',
-      description: 'Festive of colors',
-      image: 'https://images.pexels.com/photos/1157557/pexels-photo-1157557.jpeg?auto=compress&cs=tinysrgb&w=600',
-      eventType: 'Culture',
-      phoneNumber: '987654321',
-      email: 'email2@colors.com',
-      location: 'Main Square, Madrid'
-    },
-    {
-      id: 3,
-      title: 'Football match',
-      date: '2025-03-22T16:00:00',
-      description: 'FC Barcelona - Chelsea FC',
-      image: 'https://images.pexels.com/photos/1884574/pexels-photo-1884574.jpeg?auto=compress&cs=tinysrgb&w=600',
-      eventType: 'Sport',
-      phoneNumber: '123456789',
-      email: 'email3@football.com',
-      location: 'Camp Nou, Spain'
-    }
-  ]
-
+export const addNewEvent = createAsyncThunk(
+  'events/addNewEvent', 
+async (payload: Event) => {
+  const response = await axios.post(`${EVENTS_URL}/add`, payload)
+  return response.data
+})
+  
 const eventsSlice = createSlice({
   name: 'events',
   initialState,
   reducers: {
-    addEvent(state, action: PayloadAction<Event>) {
-      console.log('state', state);
-      
-      state.push(action.payload);
+    setSingleEvent(state, action: PayloadAction<Event | null>) {
+      state.singleEvent = action.payload;
     },
-  }
-});
+  },
+  extraReducers(builder) {
+    builder
+        .addCase(fetchEvents.pending, (state) => {
+          state.status = 'loading'
+        })
+        .addCase(fetchEvents.fulfilled, (state, action) => {
+          state.status = 'succeeded'
+          state.events = action.payload;
+        })
+        .addCase(fetchEvents.rejected, (state) => {
+          state.status = 'failed'
+        })
+        .addCase(fetchEventById.pending, (state) => {
+          state.status = 'loading';
+        })
+        .addCase(fetchEventById.fulfilled, (state, action) => {
+          state.status = 'succeeded';
+          state.singleEvent = action.payload;
+        })
+        .addCase(addNewEvent.fulfilled, (state, action) => {
+          state.events.push(action.payload)
+      })
+}})
 
-export const selectAllEvents = (state:any) => state.events;
-
-export const { addEvent } = eventsSlice.actions;
+export const selectAllEvents = (state: any) => state.events;
+export const selectEventById = (state: any) => state.events.singleEvent;
 
 export default eventsSlice.reducer;

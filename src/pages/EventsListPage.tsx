@@ -1,54 +1,56 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { Button, List, ListItem, ListItemText } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import { Button, Typography } from "@mui/material";
 
 import Event from './../types/event';
 import { EventsList } from "../components/EventsList/EventsList"
-import { selectAllEvents } from "features/event/eventSlice";
+import { fetchEvents, selectAllEvents } from "features/event/eventSlice";
+import { AppDispatch } from "store/store";
 
 const EventsListPage = () => {
   const events = useSelector(selectAllEvents)
-
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  
+  useEffect(() => {   
+    dispatch(fetchEvents());
+  }, [dispatch]);
 
-  const handleClickSingleEvent = () => {
-    navigate('/view-event');
+  const handleClickSingleEvent = (id: number) => {   
+    navigate(`/event/${id}`);
   };
   
   const handleClickAddEvent = () => {
     navigate('/add-event');
   };
   
-  console.log(events); 
-  
-  const orderedEvents = events.slice().sort((a: Event, b: Event) => b.date.localeCompare(a.date))
-  const renderedEvents = orderedEvents.map((event: Event) => (
-    <ListItem key={event.id} onClick={handleClickSingleEvent}>        
-      <ListItemText primary={event.title} secondary={event.date} />
-      <ListItemText primary={event.eventType} secondary={event.date} />
-    </ListItem>
-  ))
-
-  // useEffect(() => {
-  //   fetch('http://localhost:5000/events')
-  //     .then(response => {
-  //       if (!response.ok) {
-  //         throw new Error('Failed to fetch events');
-  //       }
-  //       return response.json();
-  //     })
-  //     .then(data => setEvents(data))
-  //     .catch(error => console.error(error));
-  // }, []);
+  const orderedEvents = events.events.slice().sort((a: Event, b: Event) => a.date.localeCompare(b.date))
 
   return (
-    <div>
-      <h2>Events</h2>
-      <List sx={{ maxWidth: '80em', bgcolor: 'beige' }}>
-        {renderedEvents}
-      </List>
-      <Button onClick={handleClickAddEvent} variant="contained" color="success">Add event</Button>
-      <EventsList></EventsList>
+    <div style={{ padding: "20px" }}>
+      <Typography variant="h2" sx={{ maxWidth: '80em', backgroundColor: '#f0f0f0', padding: '10px', borderRadius: '5px', marginBottom: '20px', textAlign: 'center', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' }}>
+        Events Manager
+      </Typography>
+      <Button
+        onClick={handleClickAddEvent}
+        variant="contained"
+        color="primary"
+        sx={{
+          textTransform: 'none',
+          borderRadius: '20px',
+          padding: '10px 20px',
+          boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            backgroundColor: '#1976d2',
+            boxShadow: '0px 8px 20px rgba(0, 0, 0, 0.2)',
+          },
+        }}
+      >
+        Add event
+      </Button>
+      <EventsList eventsList={orderedEvents} onClickSingleEvent={handleClickSingleEvent} />
     </div>
   )
 };

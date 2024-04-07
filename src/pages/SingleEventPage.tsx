@@ -1,20 +1,27 @@
-import { Button } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
-import { Event } from "../components/Event/Event";
+import EventComponent from "../components/Event/Event";
+import { fetchEventById, selectEventById } from "features/event/eventSlice";
+import { useEffect } from "react";
+import { AppDispatch } from "store/store";
+import GoBackButton from "components/GoBackButton/GoBackButton";
 
 const SingleEventPage = () => {
-  const navigate = useNavigate();
+  const event = useSelector(selectEventById)
+  const dispatch = useDispatch<AppDispatch>();
+  const { id } = useParams()
+  const eventId = Number(id);
 
-  const handleClick = () => {
-    navigate(-1);
-  };
+  useEffect(() => {
+    dispatch(fetchEventById(eventId));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div>
-      <h1>SingleEventPage</h1>
-      <Event></Event>
-      <Button onClick={handleClick}>Go back</Button>
+      <GoBackButton />
+      <EventComponent event={event}></EventComponent>
     </div>
     
   )

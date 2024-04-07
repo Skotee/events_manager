@@ -1,22 +1,47 @@
 import React from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { Button, Typography, TextField, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
+import { styled } from '@mui/system';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Form, Field, ErrorMessage, FormikProvider, useFormik } from 'formik';
+import { Form, FormikProvider, useFormik } from 'formik';
 import * as yup from 'yup';
 
-// import { addEvent, AddEventAction } from '../../store/actions';
 import Event from '../../types/event';
-import { addEvent } from 'features/event/eventSlice';
+import { addNewEvent } from 'features/event/eventSlice';
+import { AppDispatch } from 'store/store';
+import { phoneRegExp } from 'helpers/regex';
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const StyledForm = styled('div')({
+  maxWidth: 400,
+  margin: 'auto',
+  padding: '16px',
+  border: '1px solid #3f51b5',
+  borderRadius: 4,
+  boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+  backgroundColor: '#ffffff',
+});
 
-// interface Props {
-//   addEvent: (event: Event) => AddEventAction;
-// }
+const StyledTitle = styled(Typography)({
+  marginBottom: '16px',
+});
+
+const StyledInput = styled(TextField)({
+  marginBottom: '16px',
+});
+
+const StyledSelect = styled(FormControl)({
+  marginBottom: '16px',
+  '& .MuiInputLabel-root': {
+    marginBottom: '8px',
+  },
+});
+
+const StyledButton = styled(Button)({
+  marginRight: '8px',
+});
 
 const AddEventForm: React.FC = () => {
-  // const []
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
   const formik = useFormik({
@@ -25,14 +50,14 @@ const AddEventForm: React.FC = () => {
       title: '',
       description: '',
       date: '',
-      image: '',
+      image: 'https://picsum.photos/600/200',
       eventType: 'Culture',
       phoneNumber: '',
       email: '',
       location: '',
     },
     onSubmit: (values: Event) => {
-      const id = Math.floor(Math.random() * 100)
+      const id = Math.floor(Math.random() * 100);
       const payload = {
         id: id,
         title: values.title,
@@ -44,86 +69,155 @@ const AddEventForm: React.FC = () => {
         email: values.email,
         location: values.location,
       };
-      console.log(payload);
-
-      dispatch(
-        addEvent(payload)
-      )
+      dispatch(addNewEvent(payload));
       navigate(-1);
-      // resetForm();
     },
     validationSchema: yup.object({
       title: yup.string().required('Field required'),
       date: yup.date().required('Field required'),
       description: yup.string().required('Field required'),
-      // image: yup.string().url('Invalid URL format').required('Field required'),
       eventType: yup.string().required('Field required').oneOf(['Sport', 'Culture', 'Health'], 'Invalid event type'),
-      // phoneNumber: yup.string().matches(/^\d{9}$/, 'Invalid phone number').required('Field required'),
+      phoneNumber: yup.string().matches(phoneRegExp, 'Phone number is not valid').required('Field required'),
       email: yup.string().email('Invalid email address').required('Field required'),
       location: yup.string().required('Field required'),
     }),
   });
 
   return (
-    <div>
-      <h2>Add new event</h2>
+    <StyledForm>
+      <StyledTitle variant="h4" align="center" gutterBottom>
+        Add New Event
+      </StyledTitle>
       <FormikProvider value={formik}>
-          <Form>
-            <div>
-              <label htmlFor="title">Title:</label>
-              <Field type="text" name="title" />
-              <ErrorMessage name="title" component="div" className="error" />
-            </div>
-            <div>
-              <label htmlFor="date">Event date:</label>
-              <Field type="datetime-local" name="date" />
-              <ErrorMessage name="date" component="div" className="error" />
-            </div>
-            <div>
-              <label htmlFor="description">Description:</label>
-              <Field as="textarea" name="description" />
-              <ErrorMessage name="description" component="div" className="error" />
-            </div>
-            <div>
-              <label htmlFor="image">Image URL:</label>
-              <Field type="text" name="image" />
-              <ErrorMessage name="image" component="div" className="error" />
-            </div>
-            <div>
-              <label htmlFor="eventType">Event type:</label>
-              <Field as="select" name="eventType">
-                <option value="">Select event type</option>
-                <option value="Sport">Sport</option>
-                <option value="Culture">Culture</option>
-                <option value="Health">Health</option>
-              </Field>
-              <ErrorMessage name="eventType" component="div" className="error" />
-            </div>
-            <div>
-              <label htmlFor="phoneNumber">Phone number:</label>
-              <Field type="text" name="phoneNumber" />
-              <ErrorMessage name="phoneNumber" component="div" className="error" />
-            </div>
-            <div>
-              <label htmlFor="email">Email address:</label>
-              <Field type="email" name="email" />
-              <ErrorMessage name="email" component="div" className="error" />
-            </div>
-            <div>
-              <label htmlFor="location">Location:</label>
-              <Field type="text" name="location" />
-              <ErrorMessage name="location" component="div" className="error" />
-            </div>
-            <button type="submit" disabled={!formik.isValid || formik.isSubmitting}>Save event</button>
-            <button type="reset">Reset</button>
-          </Form>
+        <Form>
+          <StyledInput
+            fullWidth
+            id="title"
+            name="title"
+            label="Title"
+            variant="outlined"
+            onChange={formik.handleChange}
+            value={formik.values.title}
+            error={formik.touched.title && Boolean(formik.errors.title)}
+            helperText={formik.touched.title && formik.errors.title}
+          />
+          <StyledInput
+            fullWidth
+            id="date"
+            name="date"
+            type="datetime-local"
+            label="Event date"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            onChange={formik.handleChange}
+            value={formik.values.date}
+            error={formik.touched.date && Boolean(formik.errors.date)}
+            helperText={formik.touched.date && formik.errors.date}
+          />
+          <StyledInput
+            fullWidth
+            id="description"
+            name="description"
+            label="Description"
+            multiline
+            rows={4}
+            variant="outlined"
+            onChange={formik.handleChange}
+            value={formik.values.description}
+            error={formik.touched.description && Boolean(formik.errors.description)}
+            helperText={formik.touched.description && formik.errors.description}
+          />
+          <StyledInput
+            fullWidth
+            id="image"
+            name="image"
+            label="Image URL"
+            variant="outlined"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            onChange={formik.handleChange}
+            value={formik.values.image}
+            error={formik.touched.image && Boolean(formik.errors.image)}
+            helperText={formik.touched.image && formik.errors.image}
+          />
+          <em>This url will generate random image. You can replace it with different url</em>
+          <em>Recommend size for image is 600x200</em>
+          <br />
+          <br />
+          <StyledSelect variant="outlined" fullWidth>
+            <InputLabel id="eventType-label">Event type</InputLabel>
+            <Select
+              labelId="eventType-label"
+              id="eventType"
+              label="Event type"
+              name="eventType"
+              value={formik.values.eventType}
+              onChange={formik.handleChange}
+              error={formik.touched.eventType && Boolean(formik.errors.eventType)}
+            >
+              <MenuItem value="Sport">Sport</MenuItem>
+              <MenuItem value="Culture">Culture</MenuItem>
+              <MenuItem value="Health">Health</MenuItem>
+            </Select>
+            {formik.touched.eventType && Boolean(formik.errors.eventType) && (
+              <FormHelperText error>{formik.errors.eventType}</FormHelperText>
+            )}
+          </StyledSelect>
+          <StyledInput
+            fullWidth
+            id="phoneNumber"
+            name="phoneNumber"
+            label="Phone number"
+            variant="outlined"
+            onChange={formik.handleChange}
+            value={formik.values.phoneNumber}
+            error={formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber)}
+            helperText={formik.touched.phoneNumber && formik.errors.phoneNumber}
+          />
+          <StyledInput
+            fullWidth
+            id="email"
+            name="email"
+            label="Email address"
+            variant="outlined"
+            onChange={formik.handleChange}
+            value={formik.values.email}
+            error={formik.touched.email && Boolean(formik.errors.email)}
+            helperText={formik.touched.email && formik.errors.email}
+          />
+          <StyledInput
+            fullWidth
+            id="location"
+            name="location"
+            label="Location"
+            variant="outlined"
+            onChange={formik.handleChange}
+            value={formik.values.location}
+            error={formik.touched.location && Boolean(formik.errors.location)}
+            helperText={formik.touched.location && formik.errors.location}
+          />
+          <StyledButton
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={!formik.isValid || formik.isSubmitting}
+          >
+            Save event
+          </StyledButton>
+          <StyledButton
+            type="reset"
+            variant="contained"
+            color="secondary"
+            onClick={formik.handleReset}
+          >
+            Reset
+          </StyledButton>
+        </Form>
       </FormikProvider>
-    </div>
+    </StyledForm>
   );
 };
 
-const mapDispatchToProps = {
-  addEvent,
-};
-
-export default connect(null, mapDispatchToProps)(AddEventForm);
+export default AddEventForm;

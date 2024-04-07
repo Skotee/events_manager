@@ -14,4 +14,8 @@ export interface EventsState {
   events: Event[];
 }
 
+export type EventParams = {
+  eventId: number;
+};
+
 export default Event;

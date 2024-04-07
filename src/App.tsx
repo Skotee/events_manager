@@ -1,4 +1,3 @@
-import './App.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import EventsListPage from 'pages/EventsListPage';
 import SingleEventPage from 'pages/SingleEventPage';
@@ -9,7 +8,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path='/' element={<EventsListPage />}></Route>
-        <Route path='/view-event' element={<SingleEventPage />}></Route>
+        <Route path='/events' element={<EventsListPage />}></Route>
+        <Route path='/event/:id' element={<SingleEventPage />}></Route>
         <Route path='/add-event' element={<AddEventPage />}></Route>
       </Routes>
     </BrowserRouter>
