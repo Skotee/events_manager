@@ -7,13 +7,13 @@ export interface EventsListProps {
 }
 
 export const EventsList: React.FC<EventsListProps> = ({ eventsList, onClickSingleEvent }) => {
-  const subduedColors = ['#FFCCCB', '#FFE4C4', '#D8BFD8', '#B0E0E6', '#90EE90', '#F0E68C', '#FFDAB9']; // Subdued colors
+  const subduedColors = ['#FFCCCB', '#FFE4C4', '#D8BFD8', '#B0E0E6', '#90EE90', '#F0E68C', '#FFDAB9'];
 
   return (
     <List sx={{}}>
       {eventsList.map((event, index) => (
         <ListItem
-          key={`${event.id}-${index}`}
+          key={`${event.id}-${index}`} //for id uniqueness
           button
           onClick={() => onClickSingleEvent(event.id)}
           sx={{

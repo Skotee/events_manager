@@ -23,7 +23,6 @@ const SingleEventPage = () => {
       <GoBackButton />
       <EventComponent event={event}></EventComponent>
     </div>
-    
   )
 };
 

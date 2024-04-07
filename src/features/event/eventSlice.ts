@@ -40,10 +40,11 @@ export const fetchEventById = createAsyncThunk(
 
 export const addNewEvent = createAsyncThunk(
   'events/addNewEvent', 
-async (payload: Event) => {
-  const response = await axios.post(`${EVENTS_URL}/add`, payload)
-  return response.data
-})
+  async (payload: Event) => {
+    const response = await axios.post(`${EVENTS_URL}/add`, payload)
+    return response.data
+  }
+)
   
 const eventsSlice = createSlice({
   name: 'events',
@@ -65,9 +66,6 @@ const eventsSlice = createSlice({
         .addCase(fetchEvents.rejected, (state) => {
           state.status = 'failed'
         })
-        .addCase(fetchEventById.pending, (state) => {
-          state.status = 'loading';
-        })
         .addCase(fetchEventById.fulfilled, (state, action) => {
           state.status = 'succeeded';
           state.singleEvent = action.payload;
@@ -77,7 +75,8 @@ const eventsSlice = createSlice({
       })
 }})
 
-export const selectAllEvents = (state: any) => state.events;
-export const selectEventById = (state: any) => state.events.singleEvent;
+export const selectAllEvents = (state: { events: initialStateType }) => state.events;
+export const selectEventById = (state: { events: { singleEvent: Event }}) => state.events.singleEvent;
+export const getEventsStatus = (state: { events: { status: string; }; }) => state.events.status;
 
 export default eventsSlice.reducer;

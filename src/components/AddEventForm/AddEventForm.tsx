@@ -9,7 +9,7 @@ import * as yup from 'yup';
 import Event from '../../types/event';
 import { addNewEvent } from 'features/event/eventSlice';
 import { AppDispatch } from 'store/store';
-import { phoneRegExp } from 'helpers/regex';
+import { emailRegExp, phoneRegExp } from 'helpers/regex';
 
 const StyledForm = styled('div')({
   maxWidth: 400,
@@ -78,7 +78,7 @@ const AddEventForm: React.FC = () => {
       description: yup.string().required('Field required'),
       eventType: yup.string().required('Field required').oneOf(['Sport', 'Culture', 'Health'], 'Invalid event type'),
       phoneNumber: yup.string().matches(phoneRegExp, 'Phone number is not valid').required('Field required'),
-      email: yup.string().email('Invalid email address').required('Field required'),
+      email: yup.string().matches(emailRegExp, 'Invalid email address').required('Field required'),
       location: yup.string().required('Field required'),
     }),
   });
@@ -142,7 +142,8 @@ const AddEventForm: React.FC = () => {
             error={formik.touched.image && Boolean(formik.errors.image)}
             helperText={formik.touched.image && formik.errors.image}
           />
-          <em>This url will generate random image. You can replace it with different url</em>
+          <em>This url will generate random image. You can replace it with different url.</em>
+          <br />
           <em>Recommend size for image is 600x200</em>
           <br />
           <br />
@@ -202,7 +203,7 @@ const AddEventForm: React.FC = () => {
             type="submit"
             variant="contained"
             color="primary"
-            disabled={!formik.isValid || formik.isSubmitting}
+            disabled={formik.isSubmitting}
           >
             Save event
           </StyledButton>
